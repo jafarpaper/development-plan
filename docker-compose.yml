@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  arangodb:
+    image: arangodb
+    environment:
+      ARANGO_ROOT_PASSWORD: root
+    ports:
+      - "8529:8529"
+
+  nats:
+    image: nats
+    ports:
+      - "4222:4222"
