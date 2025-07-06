@@ -1,0 +1,5 @@
+// Migration: Remove retention policy
+// Drop TTL index
+
+LET dropResult = INDEX_DROP("activity_log", "idx_ttl_cleanup")
+RETURN dropResult

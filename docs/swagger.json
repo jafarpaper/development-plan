@@ -1,0 +1,348 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "A microservice for managing activity logs using gRPC and REST API following DDD principles.",
+        "title": "Activity Log Service API",
+        "contact": {
+            "name": "Activity Log Service Team",
+            "email": "support@activitylog.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "paths": {
+        "/api/v1/activity-logs": {
+            "get": {
+                "description": "Get a paginated list of activity logs for a company",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Activity Logs"
+                ],
+                "summary": "List Activity Logs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Company ID",
+                        "name": "company_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.ListActivityLogsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new activity log entry",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Activity Logs"
+                ],
+                "summary": "Create Activity Log",
+                "parameters": [
+                    {
+                        "description": "Create activity log request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.CreateActivityLogRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/http.ActivityLogResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/activity-logs/{id}": {
+            "get": {
+                "description": "Get an activity log by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Activity Logs"
+                ],
+                "summary": "Get Activity Log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Activity Log ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.ActivityLogResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Check if the service is running",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.HealthResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "http.ActivityLogResponse": {
+            "type": "object",
+            "properties": {
+                "activity_name": {
+                    "type": "string",
+                    "example": "user_created"
+                },
+                "actor_email": {
+                    "type": "string",
+                    "example": "admin@company123.com"
+                },
+                "actor_id": {
+                    "type": "string",
+                    "example": "actor_789"
+                },
+                "actor_name": {
+                    "type": "string",
+                    "example": "System Administrator"
+                },
+                "changes": {
+                    "type": "string",
+                    "example": "{\"name\": \"John Doe\"}"
+                },
+                "company_id": {
+                    "type": "string",
+                    "example": "company_123"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2023-12-07T10:30:00Z"
+                },
+                "formatted_message": {
+                    "type": "string",
+                    "example": "User John Doe was created"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400e29b41d4a716446655440000"
+                },
+                "object_id": {
+                    "type": "string",
+                    "example": "user_456"
+                },
+                "object_name": {
+                    "type": "string",
+                    "example": "user"
+                }
+            }
+        },
+        "http.CreateActivityLogRequest": {
+            "type": "object",
+            "properties": {
+                "activity_name": {
+                    "type": "string",
+                    "example": "user_created"
+                },
+                "actor_email": {
+                    "type": "string",
+                    "example": "admin@company123.com"
+                },
+                "actor_id": {
+                    "type": "string",
+                    "example": "actor_789"
+                },
+                "actor_name": {
+                    "type": "string",
+                    "example": "System Administrator"
+                },
+                "changes": {
+                    "type": "string",
+                    "example": "{\"name\": \"John Doe\"}"
+                },
+                "company_id": {
+                    "type": "string",
+                    "example": "company_123"
+                },
+                "formatted_message": {
+                    "type": "string",
+                    "example": "User John Doe was created"
+                },
+                "object_id": {
+                    "type": "string",
+                    "example": "user_456"
+                },
+                "object_name": {
+                    "type": "string",
+                    "example": "user"
+                }
+            }
+        },
+        "http.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Invalid request parameters"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "company_id is required"
+                }
+            }
+        },
+        "http.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "service": {
+                    "type": "string",
+                    "example": "activity-log-service"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "1.0.0"
+                }
+            }
+        },
+        "http.ListActivityLogsResponse": {
+            "type": "object",
+            "properties": {
+                "activity_logs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/http.ActivityLogResponse"
+                    }
+                },
+                "limit": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 150
+                }
+            }
+        }
+    }
+}

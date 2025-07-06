@@ -1,0 +1,11 @@
+{
+  "activity_name": "user_created",
+  "company_id": "company_123",
+  "object_name": "user",
+  "object_id": "user_456",
+  "changes": "{\"name\": \"John Doe\", \"email\": \"john.doe@example.com\", \"role\": \"admin\"}",
+  "formatted_message": "User John Doe (john.doe@example.com) was created with admin role",
+  "actor_id": "admin_789",
+  "actor_name": "System Administrator",
+  "actor_email": "admin@company123.com"
+}

@@ -1,0 +1,19 @@
+// Migration: Rollback initial setup
+// Remove collections and indexes
+
+// Drop all indexes first
+FOR index IN [
+    "idx_company_id",
+    "idx_created_at", 
+    "idx_company_created",
+    "idx_object",
+    "idx_actor",
+    "idx_activity_name",
+    "idx_message_fulltext"
+]
+    LET result = INDEX_DROP("activity_log", index)
+    RETURN result
+
+// Drop the collection
+LET dropResult = COLLECTION_DROP("activity_log")
+RETURN dropResult

@@ -1,13 +1,214 @@
 version: '3.8'
+
 services:
   arangodb:
-    image: arangodb
+    image: arangodb:3.11.5
+    container_name: arangodb
     environment:
-      ARANGO_ROOT_PASSWORD: root
+      - ARANGO_ROOT_PASSWORD=rootpassword
+      - ARANGO_NO_AUTH=0
     ports:
       - "8529:8529"
+    volumes:
+      - arangodb_data:/var/lib/arangodb3
+      - arangodb_apps:/var/lib/arangodb3-apps
+    networks:
+      - activity-log-network
 
   nats:
-    image: nats
+    image: nats:2.10.4-alpine
+    container_name: nats
     ports:
       - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    command: ["-js", "-m", "8222"]
+    networks:
+      - activity-log-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.51
+    container_name: jaeger
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "9411:9411"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - activity-log-network
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - activity-log-network
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configs/grafana:/etc/grafana/provisioning
+    networks:
+      - activity-log-network
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - activity-log-network
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - activity-log-network
+
+  # HTTP REST API Server
+  activity-log-http:
+    build:
+      context: .
+      dockerfile: Dockerfile.http
+    container_name: activity-log-http
+    ports:
+      - "8080:8080"
+      - "2113:2113"  # Metrics port
+    depends_on:
+      - arangodb
+      - nats
+      - jaeger
+      - redis
+      - mailhog
+    environment:
+      - CONFIG_PATH=/app/configs/config.docker.yaml
+      - SERVICE_NAME=activity-log-http
+    volumes:
+      - ./configs:/app/configs
+    networks:
+      - activity-log-network
+    restart: unless-stopped
+
+  # gRPC Server
+  activity-log-grpc:
+    build:
+      context: .
+      dockerfile: Dockerfile.grpc
+    container_name: activity-log-grpc
+    ports:
+      - "9000:9000"
+      - "2112:2112"  # Metrics port
+    depends_on:
+      - arangodb
+      - nats
+      - jaeger
+      - redis
+      - mailhog
+    environment:
+      - CONFIG_PATH=/app/configs/config.docker.yaml
+      - SERVICE_NAME=activity-log-grpc
+    volumes:
+      - ./configs:/app/configs
+    networks:
+      - activity-log-network
+    restart: unless-stopped
+
+  # NATS Consumer
+  activity-log-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.consumer
+    container_name: activity-log-consumer
+    ports:
+      - "2114:2114"  # Metrics port
+    depends_on:
+      - arangodb
+      - nats
+      - jaeger
+      - redis
+    environment:
+      - CONFIG_PATH=/app/configs/config.docker.yaml
+      - SERVICE_NAME=activity-log-consumer
+    volumes:
+      - ./configs:/app/configs
+    networks:
+      - activity-log-network
+    restart: unless-stopped
+
+  # Cron Server
+  activity-log-cron:
+    build:
+      context: .
+      dockerfile: Dockerfile.cron
+    container_name: activity-log-cron
+    ports:
+      - "2115:2115"  # Metrics port
+    depends_on:
+      - arangodb
+      - redis
+      - mailhog
+      - jaeger
+    environment:
+      - CONFIG_PATH=/app/configs/config.docker.yaml
+      - SERVICE_NAME=activity-log-cron
+    volumes:
+      - ./configs:/app/configs
+    networks:
+      - activity-log-network
+    restart: unless-stopped
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+      - "9443:9443"
+    depends_on:
+      - activity-log-http
+      - activity-log-grpc
+    volumes:
+      - ./configs/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./configs/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - activity-log-network
+    restart: unless-stopped
+
+networks:
+  activity-log-network:
+    driver: bridge
+
+volumes:
+  arangodb_data:
+  arangodb_apps:
+  prometheus_data:
+  grafana_data:
+  redis_data:

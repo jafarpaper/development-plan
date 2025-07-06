@@ -1,0 +1,240 @@
+basePath: /
+definitions:
+  http.ActivityLogResponse:
+    properties:
+      activity_name:
+        example: user_created
+        type: string
+      actor_email:
+        example: admin@company123.com
+        type: string
+      actor_id:
+        example: actor_789
+        type: string
+      actor_name:
+        example: System Administrator
+        type: string
+      changes:
+        example: '{"name": "John Doe"}'
+        type: string
+      company_id:
+        example: company_123
+        type: string
+      created_at:
+        example: "2023-12-07T10:30:00Z"
+        type: string
+      formatted_message:
+        example: User John Doe was created
+        type: string
+      id:
+        example: 550e8400e29b41d4a716446655440000
+        type: string
+      object_id:
+        example: user_456
+        type: string
+      object_name:
+        example: user
+        type: string
+    type: object
+  http.CreateActivityLogRequest:
+    properties:
+      activity_name:
+        example: user_created
+        type: string
+      actor_email:
+        example: admin@company123.com
+        type: string
+      actor_id:
+        example: actor_789
+        type: string
+      actor_name:
+        example: System Administrator
+        type: string
+      changes:
+        example: '{"name": "John Doe"}'
+        type: string
+      company_id:
+        example: company_123
+        type: string
+      formatted_message:
+        example: User John Doe was created
+        type: string
+      object_id:
+        example: user_456
+        type: string
+      object_name:
+        example: user
+        type: string
+    type: object
+  http.ErrorResponse:
+    properties:
+      code:
+        example: 400
+        type: integer
+      error:
+        example: Invalid request parameters
+        type: string
+      message:
+        example: company_id is required
+        type: string
+    type: object
+  http.HealthResponse:
+    properties:
+      service:
+        example: activity-log-service
+        type: string
+      status:
+        example: ok
+        type: string
+      version:
+        example: "1.0.0"
+        type: string
+    type: object
+  http.ListActivityLogsResponse:
+    properties:
+      activity_logs:
+        items:
+          $ref: '#/definitions/http.ActivityLogResponse'
+        type: array
+      limit:
+        example: 10
+        type: integer
+      page:
+        example: 1
+        type: integer
+      total:
+        example: 150
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@activitylog.com
+    name: Activity Log Service Team
+  description: A microservice for managing activity logs using gRPC and REST API following DDD principles.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Activity Log Service API
+  version: 1.0.0
+paths:
+  /api/v1/activity-logs:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of activity logs for a company
+      parameters:
+      - description: Company ID
+        in: query
+        name: company_id
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.ListActivityLogsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: List Activity Logs
+      tags:
+      - Activity Logs
+    post:
+      consumes:
+      - application/json
+      description: Create a new activity log entry
+      parameters:
+      - description: Create activity log request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/http.CreateActivityLogRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/http.ActivityLogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Create Activity Log
+      tags:
+      - Activity Logs
+  /api/v1/activity-logs/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get an activity log by ID
+      parameters:
+      - description: Activity Log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.ActivityLogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get Activity Log
+      tags:
+      - Activity Logs
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the service is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.HealthResponse'
+      summary: Health Check
+      tags:
+      - Health
+schemes:
+- http
+- https
+swagger: "2.0"

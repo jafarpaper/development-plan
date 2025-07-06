@@ -1,0 +1,40 @@
+// Migration: Initial setup for Activity Log Service
+// Create database and collections with proper indexes
+
+// Create the activity_logs collection if it doesn't exist
+LET collectionExists = LENGTH(FOR c IN COLLECTIONS() FILTER c.name == "activity_log" RETURN c) > 0
+
+RETURN NOT collectionExists ? (
+    FOR result IN [
+        // Create activity_log collection
+        COLLECTION_CREATE("activity_log"),
+        
+        // Create primary index (automatically created)
+        // Create secondary indexes for performance
+        
+        // Index on company_id for tenant isolation
+        INDEX_CREATE("activity_log", ["company_id"], {type: "hash", name: "idx_company_id"}),
+        
+        // Index on created_at for time-based queries
+        INDEX_CREATE("activity_log", ["created_at"], {type: "skiplist", name: "idx_created_at"}),
+        
+        // Compound index on company_id + created_at for efficient pagination
+        INDEX_CREATE("activity_log", ["company_id", "created_at"], {type: "skiplist", name: "idx_company_created"}),
+        
+        // Index on object_name + object_id for object tracking
+        INDEX_CREATE("activity_log", ["object_name", "object_id"], {type: "hash", name: "idx_object"}),
+        
+        // Index on actor_id for actor-based queries
+        INDEX_CREATE("activity_log", ["actor.id"], {type: "hash", name: "idx_actor"}),
+        
+        // Index on activity_name for filtering by activity type
+        INDEX_CREATE("activity_log", ["activity_name"], {type: "hash", name: "idx_activity_name"}),
+        
+        // Full-text index on formatted_message for search
+        INDEX_CREATE("activity_log", ["formatted_message"], {type: "fulltext", name: "idx_message_fulltext"}),
+        
+        // Geo index if we add location tracking in the future
+        // INDEX_CREATE("activity_log", ["location"], {type: "geo", name: "idx_location"})
+    ]
+    RETURN result
+) : "Collection and indexes already exist"

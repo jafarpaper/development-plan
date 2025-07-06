@@ -1,0 +1,11 @@
+// Migration: Add retention policy support
+// Add TTL index for automatic cleanup of old activity logs
+
+// Create TTL index to automatically remove logs older than 2 years (730 days)
+LET ttlResult = INDEX_CREATE("activity_log", ["created_at"], {
+    type: "ttl",
+    name: "idx_ttl_cleanup",
+    expireAfter: 63072000  // 730 days in seconds
+})
+
+RETURN ttlResult

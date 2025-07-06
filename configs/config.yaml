@@ -1,0 +1,57 @@
+server:
+  port: 8080
+  grpc_port: 9000
+  timeout: 30s
+  read_timeout: 15s
+  write_timeout: 15s
+  max_connection_idle: 5m
+  max_connection_age: 5m
+
+arango:
+  url: "http://localhost:8529"
+  database: "activity_logs"
+  username: "root"
+  password: "rootpassword"
+  collection: "activity_log"
+
+nats:
+  url: "nats://localhost:4222"
+  stream: "ACTIVITY_LOGS"
+  subject: "activity.log.created"
+  durable: "activity-log-consumer"
+  deliver_subject: "activity.log.deliver"
+  ack_wait: 30s
+  max_deliver: 3
+
+logger:
+  level: "info"
+  format: "json"
+  output: "stdout"
+
+jaeger:
+  service_name: "activity-log-service"
+  endpoint: "http://localhost:14268/api/traces"
+  sampler_type: "const"
+  sampler_param: 1
+
+metrics:
+  port: 2112
+  path: "/metrics"
+
+redis:
+  address: "localhost:6379"
+  password: ""
+  db: 0
+
+email:
+  host: "localhost"
+  port: 1025
+  username: ""
+  password: ""
+  from: "activity-log-service@example.com"
+  enabled: true
+
+cron:
+  daily_summary_time: "08:00"
+  cleanup_interval: "24h"
+  enabled: true

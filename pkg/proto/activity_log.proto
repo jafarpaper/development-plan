@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package activity_log;
+
+option go_package = "activity-log-service/pkg/proto";
+
+import "google/protobuf/timestamp.proto";
+
+// ActivityLog represents the activity log entity
+message ActivityLog {
+  string id = 1;
+  string activity_name = 2;
+  string company_id = 3;
+  string object_name = 4;
+  string object_id = 5;
+  string changes = 6; // JSON string
+  string formatted_message = 7;
+  string actor_id = 8;
+  string actor_name = 9;
+  string actor_email = 10;
+  google.protobuf.Timestamp created_at = 11;
+}
+
+// CreateActivityLogRequest represents the request to create an activity log
+message CreateActivityLogRequest {
+  string activity_name = 1;
+  string company_id = 2;
+  string object_name = 3;
+  string object_id = 4;
+  string changes = 5; // JSON string
+  string formatted_message = 6;
+  string actor_id = 7;
+  string actor_name = 8;
+  string actor_email = 9;
+}
+
+// CreateActivityLogResponse represents the response after creating an activity log
+message CreateActivityLogResponse {
+  ActivityLog activity_log = 1;
+}
+
+// GetActivityLogRequest represents the request to get an activity log by ID
+message GetActivityLogRequest {
+  string id = 1;
+}
+
+// GetActivityLogResponse represents the response containing the activity log
+message GetActivityLogResponse {
+  ActivityLog activity_log = 1;
+}
+
+// ListActivityLogsRequest represents the request to list activity logs
+message ListActivityLogsRequest {
+  string company_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+// ListActivityLogsResponse represents the response containing activity logs
+message ListActivityLogsResponse {
+  repeated ActivityLog activity_logs = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+// ActivityLogService defines the gRPC service for activity logs
+service ActivityLogService {
+  rpc CreateActivityLog(CreateActivityLogRequest) returns (CreateActivityLogResponse);
+  rpc GetActivityLog(GetActivityLogRequest) returns (GetActivityLogResponse);
+  rpc ListActivityLogs(ListActivityLogsRequest) returns (ListActivityLogsResponse);
+}
