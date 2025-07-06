@@ -1,0 +1,46 @@
+// Create activity_logs collection
+LET collectionName = "activity_logs"
+LET collectionExists = LENGTH(FOR c IN COLLECTIONS() FILTER c.name == collectionName RETURN c) > 0
+
+RETURN collectionExists ? 
+    "Collection already exists" : 
+    (
+        LET collection = FIRST(
+            FOR doc IN [{}]
+            LET result = DOCUMENT(CONCAT("_system/", collectionName))
+            RETURN result || CREATE_COLLECTION(collectionName, { 
+                type: 2,
+                schema: {
+                    level: "moderate",
+                    message: "The document does not conform to the schema",
+                    type: "object",
+                    properties: {
+                        _key: { type: "string" },
+                        activity_name: { type: "string" },
+                        company_id: { type: "string" },
+                        object_name: { type: "string" },
+                        object_id: { type: "string" },
+                        changes: { type: "object" },
+                        formatted_message: { type: "string" },
+                        actor_id: { type: "string" },
+                        actor_name: { type: "string" },
+                        actor_email: { type: "string", format: "email" },
+                        created_at: { type: "string", format: "date-time" }
+                    },
+                    required: [
+                        "_key",
+                        "activity_name",
+                        "company_id", 
+                        "object_name",
+                        "object_id",
+                        "formatted_message",
+                        "actor_id",
+                        "actor_name",
+                        "actor_email",
+                        "created_at"
+                    ]
+                }
+            })
+        )
+        RETURN collection ? "Collection created successfully" : "Failed to create collection"
+    )

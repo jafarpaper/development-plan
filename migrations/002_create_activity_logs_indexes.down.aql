@@ -1,0 +1,60 @@
+// Drop indexes for activity_logs collection
+LET collectionName = "activity_logs"
+
+// Drop all custom indexes
+LET dropCompanyIdIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN DROP_INDEX(CONCAT(collectionName, "/idx_company_id"))
+)
+
+LET dropObjectIdIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN DROP_INDEX(CONCAT(collectionName, "/idx_object_id"))
+)
+
+LET dropActivityNameIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN DROP_INDEX(CONCAT(collectionName, "/idx_activity_name"))
+)
+
+LET dropActorIdIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN DROP_INDEX(CONCAT(collectionName, "/idx_actor_id"))
+)
+
+LET dropCreatedAtIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN DROP_INDEX(CONCAT(collectionName, "/idx_created_at"))
+)
+
+LET dropCompanyCreatedAtIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN DROP_INDEX(CONCAT(collectionName, "/idx_company_created_at"))
+)
+
+LET dropCompanyObjectIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN DROP_INDEX(CONCAT(collectionName, "/idx_company_object"))
+)
+
+LET dropCompanyActivityIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN DROP_INDEX(CONCAT(collectionName, "/idx_company_activity"))
+)
+
+LET dropCompanyActorIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN DROP_INDEX(CONCAT(collectionName, "/idx_company_actor"))
+)
+
+RETURN {
+    company_id_index: dropCompanyIdIndex,
+    object_id_index: dropObjectIdIndex,
+    activity_name_index: dropActivityNameIndex,
+    actor_id_index: dropActorIdIndex,
+    created_at_index: dropCreatedAtIndex,
+    company_created_at_index: dropCompanyCreatedAtIndex,
+    company_object_index: dropCompanyObjectIndex,
+    company_activity_index: dropCompanyActivityIndex,
+    company_actor_index: dropCompanyActorIndex
+}

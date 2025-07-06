@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/arangodb/go-driver"
 	"github.com/sirupsen/logrus"
@@ -124,7 +125,7 @@ func (m *Migrator) CreateMigrationsCollection(ctx context.Context) error {
 }
 
 func (m *Migrator) GetAppliedMigrations(ctx context.Context) ([]int, error) {
-	collection, err := m.db.Collection(ctx, "migrations")
+	_, err := m.db.Collection(ctx, "migrations")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get migrations collection: %w", err)
 	}
@@ -159,7 +160,7 @@ func (m *Migrator) RecordMigration(ctx context.Context, version int, name string
 		"_key":       fmt.Sprintf("%03d", version),
 		"version":    version,
 		"name":       name,
-		"applied_at": driver.Time{}.Now(),
+		"applied_at": time.Now(),
 	}
 
 	_, err = collection.CreateDocument(ctx, doc)

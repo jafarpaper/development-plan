@@ -1,0 +1,13 @@
+// Drop activity_logs collection
+LET collectionName = "activity_logs"
+LET collectionExists = LENGTH(FOR c IN COLLECTIONS() FILTER c.name == collectionName RETURN c) > 0
+
+RETURN collectionExists ? 
+    (
+        LET result = FIRST(
+            FOR doc IN [{}]
+            RETURN FLATTEN([DROP_COLLECTION(collectionName)])
+        )
+        RETURN result ? "Collection dropped successfully" : "Failed to drop collection"
+    ) : 
+    "Collection does not exist"

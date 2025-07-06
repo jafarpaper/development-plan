@@ -1,0 +1,95 @@
+// Create indexes for activity_logs collection
+LET collectionName = "activity_logs"
+
+// Create index on company_id for efficient company-based queries
+LET companyIdIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN ENSURE_INDEX(collectionName, ["company_id"], { 
+        type: "hash", 
+        name: "idx_company_id" 
+    })
+)
+
+// Create index on object_id for efficient object-based queries  
+LET objectIdIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN ENSURE_INDEX(collectionName, ["object_id"], { 
+        type: "hash", 
+        name: "idx_object_id" 
+    })
+)
+
+// Create index on activity_name for efficient activity-based queries
+LET activityNameIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN ENSURE_INDEX(collectionName, ["activity_name"], { 
+        type: "hash", 
+        name: "idx_activity_name" 
+    })
+)
+
+// Create index on actor_id for efficient actor-based queries
+LET actorIdIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN ENSURE_INDEX(collectionName, ["actor_id"], { 
+        type: "hash", 
+        name: "idx_actor_id" 
+    })
+)
+
+// Create index on created_at for efficient time-based queries and sorting
+LET createdAtIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN ENSURE_INDEX(collectionName, ["created_at"], { 
+        type: "skiplist", 
+        name: "idx_created_at" 
+    })
+)
+
+// Create composite index on company_id and created_at for efficient pagination
+LET companyCreatedAtIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN ENSURE_INDEX(collectionName, ["company_id", "created_at"], { 
+        type: "skiplist", 
+        name: "idx_company_created_at" 
+    })
+)
+
+// Create composite index on company_id and object_id for efficient object activity queries
+LET companyObjectIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN ENSURE_INDEX(collectionName, ["company_id", "object_id"], { 
+        type: "hash", 
+        name: "idx_company_object" 
+    })
+)
+
+// Create composite index on company_id and activity_name for efficient activity type queries
+LET companyActivityIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN ENSURE_INDEX(collectionName, ["company_id", "activity_name"], { 
+        type: "hash", 
+        name: "idx_company_activity" 
+    })
+)
+
+// Create composite index on company_id and actor_id for efficient actor activity queries
+LET companyActorIndex = FIRST(
+    FOR doc IN [{}]
+    RETURN ENSURE_INDEX(collectionName, ["company_id", "actor_id"], { 
+        type: "hash", 
+        name: "idx_company_actor" 
+    })
+)
+
+RETURN {
+    company_id_index: companyIdIndex,
+    object_id_index: objectIdIndex,
+    activity_name_index: activityNameIndex,
+    actor_id_index: actorIdIndex,
+    created_at_index: createdAtIndex,
+    company_created_at_index: companyCreatedAtIndex,
+    company_object_index: companyObjectIndex,
+    company_activity_index: companyActivityIndex,
+    company_actor_index: companyActorIndex
+}
